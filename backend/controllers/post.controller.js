@@ -42,7 +42,9 @@ export const deletePost = async (req, res) => {
             return res.status(401).json({message: "You are not authorized to delete this post"});
         }
         if(post.img) {
-            const imgId = post.img.split("/").split(".")[0];
+            const imgParts = post.img.split("/");
+            const imgFileName = imgParts[imgParts.length - 1]; // Get last part of URL
+            const imgId = imgFileName.split(".")[0];
             await cloudinary.uploader.destroy(imgId);
         }
         await Post.findByIdAndDelete(req.params.id);

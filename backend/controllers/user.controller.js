@@ -137,3 +137,24 @@ export const updateUser = async(req,res) => {
         res.status(500).json({error: error.message});
     }
 };
+
+export const searchUsers = async (req, res) => {
+    const { query } = req.query;
+  
+    if (!query) {
+      return res.status(400).json({ error: "Search query is required" });
+    }
+  
+    try {
+      const regex = new RegExp(query, "i"); // Case-insensitive search
+  
+      const users = await User.find({
+        $or: [{ username: regex }, { fullName: regex }],
+      }).select("username fullName _id");
+  
+      res.status(200).json(users);
+    } catch (error) {
+      console.error("Error in searchUsers controller", error.message);
+      res.status(500).json({ error: "Server error" });
+    }
+};

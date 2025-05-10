@@ -46,6 +46,22 @@ const ProfilePage = () => {
 		},
 	});
 
+	useEffect(() => {
+		console.log(user?._id);
+	}, [user]);
+
+	const { data: userPosts = [], isLoading: postsLoading } = useQuery({
+		queryKey: ["userPosts", user?._id],
+		enabled: !!user?._id,
+		queryFn: async () => {
+		  const res = await fetch(`/api/posts/user/${username}`);
+		  const data = await res.json();
+		  console.log(data);
+		  if (!res.ok) throw new Error(data.error || "Failed to fetch user posts");
+		  return data;
+		},
+	});
+
 	const {isUpdatingProfile, updateProfile} = useUpdateUserProfile();
 
 	const isMyProfile = authUser._id === user?._id;
@@ -82,7 +98,9 @@ const ProfilePage = () => {
 								</Link>
 								<div className='flex flex-col'>
 									<p className='font-bold text-lg'>{user?.fullName}</p>
-									<span className='text-sm text-slate-500'>{POSTS?.length} posts</span>
+									<span className='text-sm text-slate-500'>
+										{postsLoading ? "Loading..." : `${userPosts.length} posts`}
+									</span>
 								</div>
 							</div>
 							{/* COVER IMG */}

@@ -120,6 +120,10 @@ const Post = ({ post }) => {
 		LikePost();
 	};
 
+	const handleComingSoonClick = () => {
+		toast("Coming Soon!");
+	};
+
 	return (
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
@@ -221,7 +225,7 @@ const Post = ({ post }) => {
 									<button className='outline-none'>close</button>
 								</form>
 							</dialog>
-							<div className='flex gap-1 items-center group cursor-pointer'>
+							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleComingSoonClick}>
 								<BiRepost className='w-6 h-6  text-slate-500 group-hover:text-green-500' />
 								<span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
 							</div>
@@ -242,7 +246,7 @@ const Post = ({ post }) => {
 							</div>
 						</div>
 						<div className='flex w-1/3 justify-end gap-2 items-center'>
-							<FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer' />
+							<FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer' onClick={handleComingSoonClick} />
 						</div>
 					</div>
 				</div>

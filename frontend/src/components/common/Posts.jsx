@@ -3,7 +3,8 @@ import PostSkeleton from "../skeletons/PostSkeleton";
 import { POSTS } from "../../utils/db/dummy";
 import {useQuery} from "@tanstack/react-query";
 import { useEffect } from "react";
-
+import { FaRetweet, FaBookmark } from "react-icons/fa";
+import { toast } from 'react-hot-toast'; 
 const Posts = ({feedType, username, userId}) => {
 	
 	const getPostEndpoint = () => {
@@ -41,9 +42,6 @@ const Posts = ({feedType, username, userId}) => {
 	useEffect(() => {
 		refetch();
 	}, [feedType, refetch, username]);
-
-
-	
 
 	return (
 		<>

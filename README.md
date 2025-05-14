@@ -88,12 +88,12 @@ xclone/
 
 ## 🔮 Future Enhancements
 
-- 🔁 **Repost Functionality** – Allow users to repost content similar to retweets  
-- 📌 **Save Posts** – Save favorite posts for later viewing  
-- 🌗 **Theme Toggle** – Light/Dark mode support  
-- 🧵 **Threaded Comments** – Enable nested replies for better conversations  
-- 🧭 **Explore Page** – Discover trending content and hashtags  
-- 📱 **Mobile App Version** – Build a cross-platform app using React Native  
+- 🔁 Repost Functionality – Allow users to repost content similar to retweets  
+- 📌 Save Posts – Save favorite posts for later viewing  
+- 🌗 Theme Toggle – Light/Dark mode support  
+- 🧵 Threaded Comments – Enable nested replies for better conversations  
+- 🧭 Explore Page – Discover trending content and hashtags  
+- 📱 Mobile App Version – Build a cross-platform app using React Native  
 
 ---
 

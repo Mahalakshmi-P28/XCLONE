@@ -104,5 +104,5 @@ This project is open source under the MIT License.
 
 🙋‍♀️ Author
 Developed with ❤️ by Mahalakshmi
-🔗 LinkedIn
-🔗 GitHub
+🔗 LinkedIn[https://www.linkedin.com/in/pilla-mahalakshmi-09642a259/]
+🔗 GitHub[https://github.com/Mahalakshmi-P28/]

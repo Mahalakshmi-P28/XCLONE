@@ -103,7 +103,7 @@ const CreatePost = () => {
 				{img && (
 					<div className='relative w-72 mx-auto'>
 						<IoCloseSharp
-							className='absolute top-0 right-0 text-white bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
+							className='absolute top-0 right-0 text-base-content bg-gray-800 rounded-full w-5 h-5 cursor-pointer'
 							onClick={() => {
 								setImg(null);
 								imgRef.current.value = null;
@@ -128,7 +128,7 @@ const CreatePost = () => {
 						/>
 					</div>
 					<input type='file' accept='image/*' hidden ref={imgRef} onChange={handleImgChange} />
-					<button className='btn btn-primary rounded-full btn-sm text-white px-4'>
+					<button className='btn btn-primary rounded-full btn-sm text-base-content px-4'>
 						{isPending ? "Posting..." : "Post"}
 					</button>
 				</div>

@@ -60,7 +60,7 @@ const SearchPage = () => {
 					placeholder='Enter username or full name'
 					value={query}
 					onChange={handleSearchChange}
-					className='input input-bordered w-full bg-[#121212] text-white'
+					className='input input-bordered w-full bg-base-200 text-base-content placeholder:text-base-content'
 				/>
 				<button type='submit' className='btn btn-primary'>Go</button>
 			</form>
@@ -84,7 +84,7 @@ const SearchPage = () => {
 
 			{/* Display "No results found" when no users are found */}
 			{query.trim() && results.length === 0 && (
-				<div className="mt-4 text-white">No users found</div>
+				<div className="mt-4 text-base-content">No users found</div>
 			)}
 		</div>
 	);

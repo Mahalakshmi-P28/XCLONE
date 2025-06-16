@@ -158,3 +158,48 @@ export const searchUsers = async (req, res) => {
       res.status(500).json({ error: "Server error" });
     }
 };
+
+export const removeProfileImage = async (req, res) => {
+    try {
+      const user = await User.findById(req.user._id);
+  
+      if (!user) return res.status(404).json({ error: "User not found" });
+  
+      // Remove image from Cloudinary
+      if (user.profileImg) {
+        const publicId = user.profileImg.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
+      }
+  
+      user.profileImg = "";
+      await user.save();
+  
+      res.status(200).json({ message: "Profile image removed successfully" });
+    } catch (error) {
+      console.error("Error in removeProfileImage:", error.message);
+      res.status(500).json({ error: "Failed to remove profile image" });
+    }
+};
+  
+export const removeCoverImage = async (req, res) => {
+    try {
+      const user = await User.findById(req.user._id);
+  
+      if (!user) return res.status(404).json({ error: "User not found" });
+  
+      // Remove image from Cloudinary
+      if (user.coverImg) {
+        const publicId = user.coverImg.split("/").pop().split(".")[0];
+        await cloudinary.uploader.destroy(publicId);
+      }
+  
+      user.coverImg = "";
+      await user.save();
+  
+      res.status(200).json({ message: "Cover image removed successfully" });
+    } catch (error) {
+      console.error("Error in removeCoverImage:", error.message);
+      res.status(500).json({ error: "Failed to remove cover image" });
+    }
+};
+  

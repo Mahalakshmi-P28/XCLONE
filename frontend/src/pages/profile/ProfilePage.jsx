@@ -173,6 +173,7 @@ const ProfilePage = () => {
 											});
 											setProfileImg(null);
 											setCoverImg(null);
+											refetch();
 										}}
 									>
 										{isUpdatingProfile ? "Updating..." : "Update"}

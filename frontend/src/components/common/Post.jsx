@@ -17,6 +17,7 @@ const Post = ({ post }) => {
 	const postOwner = post.user;
 	const isLiked = post.likes.includes(authUser._id);
 	const isMyPost = authUser._id === post.user._id;
+	const isSaved = authUser.savedPosts?.includes(post._id);
 	const formattedDate = formatPostDate(post.createdAt);
 
 	const {mutate:deletePost, isPending:isDeleting} = useMutation({
@@ -105,6 +106,77 @@ const Post = ({ post }) => {
 		},
 	});
 
+	const { mutate: repostPost, isPending: isReposting } = useMutation({
+		mutationFn: async () => {
+			try {
+				const res = await fetch(`/api/posts/repost/${post._id}`, {
+					method: "POST"
+				});
+				const data = await res.json();
+				if (!res.ok) {
+					throw new Error(data.message || "Something went wrong");
+				}
+				return data;
+			} catch (error) {
+				throw new Error(error.message || "Something went wrong");
+			}
+		},
+		onSuccess: () => {
+			toast.success("Reposted successfully");
+			queryClient.invalidateQueries({ queryKey: ["posts"] });
+		},
+		onError: (error) => {
+			toast.error(error.message || "Repost failed");
+		}
+	});
+
+	const { mutate: toggleSavePost, isPending: isSaving } = useMutation({
+		mutationFn: async () => {
+			const res = await fetch(`/api/posts/${post._id}/save`, {
+				method: "POST",
+				credentials: "include",
+			});
+			const data = await res.json();
+			if (!res.ok) throw new Error(data.error || "Something went wrong");
+			return data;
+		},
+	
+		onMutate: async () => {
+			await queryClient.cancelQueries({ queryKey: ["authUser"] });
+			const previousUser = queryClient.getQueryData(["authUser"]);
+	
+			queryClient.setQueryData(["authUser"], (oldData) => {
+				if (!oldData) return oldData;
+				const alreadySaved = oldData.savedPosts?.includes(post._id);
+				const updatedSavedPosts = alreadySaved
+					? oldData.savedPosts.filter((id) => id !== post._id)
+					: [...(oldData.savedPosts || []), post._id];
+				return {
+					...oldData,
+					savedPosts: updatedSavedPosts,
+				};
+			});
+	
+			return { previousUser };
+		},
+	
+		onSuccess: (data) => {
+			toast.success(data.message);
+			// Invalidate other saved queries if they exist
+			queryClient.invalidateQueries({ queryKey: ["authUser"] });
+			queryClient.invalidateQueries({ queryKey: ["savedPosts"] }); // ← Add this if you use it
+		},
+	
+		onError: (error, variables, context) => {
+			toast.error(error.message || "Failed to save post");
+			if (context?.previousUser) {
+				queryClient.setQueryData(["authUser"], context.previousUser);
+			}
+		}
+	});
+	
+	
+
 	const handleDeletePost = () => {
 		deletePost();
 	};
@@ -128,7 +200,7 @@ const Post = ({ post }) => {
 		<>
 			<div className='flex gap-2 items-start p-4 border-b border-gray-700'>
 				<div className='avatar'>
-					<Link to={`/profile/${postOwner.username}`} className='w-8 rounded-full overflow-hidden'>
+					<Link to={`/profile/${postOwner.username}`} className='w-10 h-10 rounded-full overflow-hidden'>
 						<img src={postOwner.profileImg || "/avatar-placeholder.png"} />
 					</Link>
 				</div>
@@ -225,10 +297,17 @@ const Post = ({ post }) => {
 									<button className='outline-none'>close</button>
 								</form>
 							</dialog>
-							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleComingSoonClick}>
-								<BiRepost className='w-6 h-6  text-slate-500 group-hover:text-green-500' />
-								<span className='text-sm text-slate-500 group-hover:text-green-500'>0</span>
+							<div className='flex gap-1 items-center group cursor-pointer' onClick={() => !isReposting && repostPost()}>
+								{isReposting ? (
+									<LoadingSpinner size='sm' />
+								) : (
+									<BiRepost className='w-6 h-6 text-slate-500 group-hover:text-green-500' />
+								)}
+								<span className='text-sm text-slate-500 group-hover:text-green-500'>
+									{post.repostedBy ? post.repostedBy.length : 0}
+								</span>
 							</div>
+
 							<div className='flex gap-1 items-center group cursor-pointer' onClick={handleLikePost}>
 								{isLiking && <LoadingSpinner size='sm'/>}
 								{!isLiked && !isLiking && (
@@ -246,7 +325,14 @@ const Post = ({ post }) => {
 							</div>
 						</div>
 						<div className='flex w-1/3 justify-end gap-2 items-center'>
-							<FaRegBookmark className='w-4 h-4 text-slate-500 cursor-pointer' onClick={handleComingSoonClick} />
+						{isSaving ? (
+							<LoadingSpinner size='sm' />
+						) : (
+							<FaRegBookmark
+								className={`w-4 h-4 cursor-pointer ${isSaved ? "text-yellow-500" : "text-slate-500"} hover:text-yellow-500`}
+								onClick={() => toggleSavePost()}
+							/>
+						)}
 						</div>
 					</div>
 				</div>

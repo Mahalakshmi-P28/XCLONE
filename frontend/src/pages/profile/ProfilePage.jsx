@@ -7,10 +7,11 @@ import EditProfileModal from "./EditProfileModel";
 
 import { FaArrowLeft } from "react-icons/fa6";
 import { IoCalendarOutline } from "react-icons/io5";
-import { FaLink } from "react-icons/fa";
+import { FaLink} from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { formatMemberSinceDate } from "../../utils/date";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import useFollow from "../../hooks/usefollow";
 import useUpdateUserProfile from "../../hooks/useUpdateUserProfile";
@@ -27,6 +28,9 @@ const ProfilePage = () => {
 	const { follow, isPending } = useFollow();
 	const { data: authUser } = useQuery({ queryKey: ["authUser"] });
 
+	const location = useLocation();
+	const navigate = useNavigate();
+
 	const { data: user, isLoading, refetch, isRefetching } = useQuery({
 		queryKey: ["userProfile"],
 		queryFn: async () => {
@@ -42,6 +46,14 @@ const ProfilePage = () => {
 			}
 		},
 	});
+
+	const handleBack = () => {
+		if (location.state?.fromSearch) {
+		  navigate("/search");
+		} else {
+		  navigate("/"); // or navigate(-1)
+		}
+	};
 
 	useEffect(() => {
 		console.log(user?._id);
@@ -93,9 +105,9 @@ const ProfilePage = () => {
 					{!isLoading && !isRefetching && user && (
 						<>
 							<div className='flex gap-10 px-4 py-2 items-center'>
-								<Link to='/'>
-									<FaArrowLeft className='w-4 h-4 text-base-content' />
-								</Link>
+							<button onClick={handleBack}>
+								<FaArrowLeft className='w-4 h-4 text-base-content' />
+							</button>
 								<div className='flex flex-col'>
 									<p className='font-bold text-lg text-base-content'>{user?.fullName}</p>
 									<span className='text-sm font-medium text-base-content'>

@@ -3,7 +3,6 @@ import Post from "../models/post.model.js";
 import {v2 as cloudinary} from "cloudinary";
 import Notification from "../models/notification.model.js";
 
-
 export const createPost = async (req, res) => {
     try {
         const {text} = req.body;
@@ -13,7 +12,7 @@ export const createPost = async (req, res) => {
         const user = await User.findById(userId);
         if(!user) return res.status(404).json({message: "User not found"});
 
-        if(!text && !img) return res.status(400).json({message: "Text or image is required"});
+        if(!text && !img) return res.status(400).json({message: "Post must contain text or an image"});
 
         if(img) {
             const uploadedResponse = await cloudinary.uploader.upload(img);
@@ -41,6 +40,13 @@ export const deletePost = async (req, res) => {
         if(post.user.toString() !== req.user._id.toString()) {
             return res.status(401).json({message: "You are not authorized to delete this post"});
         }
+
+        if (post.isRepost && post.originalPost) {
+            await Post.findByIdAndUpdate(post.originalPost, {
+                $pull: { repostedBy: req.user._id }
+            });
+        }
+
         if(post.img) {
             const imgParts = post.img.split("/");
             const imgFileName = imgParts[imgParts.length - 1]; // Get last part of URL
@@ -199,3 +205,108 @@ export const getUserPosts = async (req, res) => {
         res.status(500).json({error: "Internal Server Error"});
     }
 }
+
+export const repostPost = async (req, res) => {
+    try {
+        const originalPostId = req.params.id;
+
+        const originalPost = await Post.findById(originalPostId);
+        if (!originalPost) {
+            return res.status(404).json({ message: "Original post not found." });
+        }
+
+        const alreadyReposted = await Post.findOne({
+            user: req.user._id,
+            isRepost: true,
+            originalPost: originalPostId
+        });
+
+        if (alreadyReposted) {
+            return res.status(400).json({ message: "You already reposted this." });
+        }
+
+        const repost = new Post({
+            user: req.user._id,
+            text: originalPost.text,
+            img: originalPost.img || "",
+            isRepost: true,
+            originalPost: originalPost._id
+        });
+
+        await repost.save();
+
+        // Add user to repostedBy list in original post
+        if (!originalPost.repostedBy.includes(req.user._id)) {
+            originalPost.repostedBy.push(req.user._id);
+            await originalPost.save();
+        }
+
+        // Create repost notification
+        if (req.user._id.toString() !== originalPost.user.toString()) {
+            const notification = new Notification({
+                from: req.user._id,
+                to: originalPost.user,
+                type: "repost"
+            });
+            await notification.save();
+        }
+
+        return res.status(201).json({ message: "Post reposted successfully!", repost });
+
+    } catch (err) {
+        console.error("Error in repostPost:", err);
+        res.status(500).json({ message: "Server Error" });
+    }
+};
+
+export const saveUnsavePost = async (req, res) => {
+    try {
+        const userId = req.user._id;
+        const postId = req.params.id;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        const alreadySaved = user.savedPosts.map(String).includes(postId);
+
+        if (alreadySaved) {
+            await User.findByIdAndUpdate(userId, {
+                $pull: { savedPosts: postId },
+            });
+            return res.status(200).json({
+                message: "Post unsaved successfully",
+            }); 
+        } else {
+            await User.findByIdAndUpdate(userId, {
+                $addToSet: { savedPosts: postId },
+            });
+            const updatedUser = await User.findById(userId);
+            return res.status(200).json({
+                message: alreadySaved ? "Post unsaved successfully" : "Post saved successfully",
+                savedPosts: updatedUser.savedPosts,
+            });
+        }
+    } catch (error) {
+        console.error("Error in saveUnsavePost controller:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};
+
+export const getSavedPosts = async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate({
+            path: "savedPosts",
+            populate: {
+                path: "user comments.user",
+                select: "-password"
+            }
+        });
+
+        if (!user) return res.status(404).json({ error: "User not found" });
+
+        res.status(200).json(user.savedPosts);
+    } catch (error) {
+        console.error("Error in getSavedPosts controller:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+};

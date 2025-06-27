@@ -13,6 +13,10 @@ const LoginPage = () => {
 		username: "",
 		password: "",
 	});
+	const [fieldErrors, setFieldErrors] = useState({
+		username: "",
+		password: "",
+	});
 	const queryClient = useQueryClient();
 
 	const { mutate: loginMutation, isPending, isError, error } = useMutation({
@@ -40,6 +44,23 @@ const LoginPage = () => {
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
+		const newErrors = { username: "", password: "" };
+		let hasError = false;
+
+		if (!formData.username.trim()) {
+			newErrors.username = "Username is required";
+			hasError = true;
+		}
+		if (!formData.password.trim()) {
+			newErrors.password = "Password is required";
+			hasError = true;
+		}
+
+		setFieldErrors(newErrors);
+
+		if (hasError) {
+			return;
+		}
 		loginMutation(formData);
 	};
 
@@ -68,6 +89,9 @@ const LoginPage = () => {
 							value={formData.username}
 						/>
 					</label>
+					{fieldErrors.username && (
+						<p className="text-error text-sm ml-2">{fieldErrors.username}</p>
+					)}
 
 					<label className="input input-bordered rounded flex items-center gap-2 bg-base-200">
 						<MdPassword />
@@ -80,6 +104,9 @@ const LoginPage = () => {
 							value={formData.password}
 						/>
 					</label>
+					{fieldErrors.password && (
+						<p className="text-error text-sm ml-2">{fieldErrors.password}</p>
+					)}
 
 					<button className="btn rounded-full btn-primary">
 						{isPending ? "Loading..." : "Login"}

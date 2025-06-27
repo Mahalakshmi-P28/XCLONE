@@ -8,7 +8,8 @@ const postSchema = new mongoose.Schema({
     },
     text: {
         type: String,
-        required: true
+        required: false,
+        default: ""
     },
     img: {
         type: String
@@ -31,10 +32,25 @@ const postSchema = new mongoose.Schema({
                 required: true
             },
         },
-    ],  
-    }, 
-    {timestamps: true}
-);
+    ],
+
+    isRepost: {
+        type: Boolean,
+        default: false
+    },
+    originalPost: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Post',
+        default: null
+    },
+    repostedBy: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User'
+        }
+    ]
+    
+}, { timestamps: true });
 
 const Post = mongoose.model('Post', postSchema);
 

@@ -13,4 +13,6 @@ router.post("/update",protectRoute,updateUser);
 router.put("/removeProfileImage", protectRoute, removeProfileImage);
 router.put("/removeCoverImage", protectRoute, removeCoverImage);
 
+
+
 export default router;
